@@ -18,6 +18,7 @@ export default function Todos() {
     ]);
     const [ newTodo, setNewTodo ] = useState('');
 
+// add new todo
     const changeHandler = (e) => {
         setNewTodo(e.target.value);
     }
@@ -30,12 +31,16 @@ export default function Todos() {
                     title: newTodo,
                     status: false
                 }
-            ])
+            ]);
 
             setNewTodo('');
         }
     }
 
+// delete todo
+    const deleteTodoHandler = (id) => {
+        setTodos(todos.filter(todo => todo.id != id))
+    }
 
     return (
         <div className="bg-gray-100">
@@ -53,7 +58,12 @@ export default function Todos() {
                     </div>
                     <TodosList>
                         {
-                            todos.map((item) => <Todo key={item.id} todo={item} />)
+                            todos.map((item) =>
+                                <Todo
+                                    key={item.id}
+                                    todo={item}
+                                    deleteTodoHandler={deleteTodoHandler}
+                                />)
                         }
                     </TodosList>
                 </div>
