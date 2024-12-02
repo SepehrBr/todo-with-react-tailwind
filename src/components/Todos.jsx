@@ -16,6 +16,25 @@ export default function Todos() {
             status: false
         }
     ]);
+    const [ newTodo, setNewTodo ] = useState('');
+
+    const changeHandler = (e) => {
+        setNewTodo(e.target.value);
+    }
+    const pressEnterHandler = (e) => {
+        if (e.key == 'Enter' && newTodo != "") {
+            setTodos([
+                ...todos,
+                {
+                    id: uuidv4(),
+                    title: newTodo,
+                    status: false
+                }
+            ])
+
+            setNewTodo('');
+        }
+    }
 
 
     return (
@@ -27,6 +46,9 @@ export default function Todos() {
                     </div>
                     <div className="relative">
                         <input type="text" placeholder="What needs to be done today?"
+                            onChange={changeHandler}
+                            onKeyUp={pressEnterHandler}
+                            value={newTodo}
                         className="w-full px-2 py-3 border rounded outline-none border-grey-600" />
                     </div>
                     <TodosList>
