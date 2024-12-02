@@ -39,9 +39,21 @@ export default function Todos() {
 
 // delete todo
     const deleteTodoHandler = (id) => {
-        setTodos(todos.filter(todo => todo.id != id))
+        setTodos(todos.filter(todo => todo.id != id));
     }
 
+// check uncheck
+    const changeStatusHandler = (id) => {
+        let toggleStatus = todos.map(todo => {
+            if (todo.id == id) {
+                todo.status = !todo.status;
+            }
+
+            return todo;
+        });
+
+        setTodos(toggleStatus);
+    }
     return (
         <div className="bg-gray-100">
             <div className="flex items-center justify-center h-screen">
@@ -63,6 +75,7 @@ export default function Todos() {
                                     key={item.id}
                                     todo={item}
                                     deleteTodoHandler={deleteTodoHandler}
+                                    changeStatus={changeStatusHandler}
                                 />)
                         }
                     </TodosList>
