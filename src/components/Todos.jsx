@@ -54,6 +54,20 @@ export default function Todos() {
 
         setTodos(toggleStatus);
     }
+
+// edit todo
+    const pressEnterToEditHandler = (todo, editedTodo) => {
+        let newTodo = todos.map(item => {
+            if (todo.id == item.id) {
+                item.title = editedTodo;
+            }
+
+            return item;
+        });
+
+        setTodos(newTodo);
+    }
+
     return (
         <div className="bg-gray-100">
             <div className="flex items-center justify-center h-screen">
@@ -76,6 +90,7 @@ export default function Todos() {
                                     todo={item}
                                     deleteTodoHandler={deleteTodoHandler}
                                     changeStatus={changeStatusHandler}
+                                    pressEnterToEditHandler={pressEnterToEditHandler}
                                 />)
                         }
                     </TodosList>
