@@ -2,6 +2,7 @@ import { useState } from "react";
 import TodosList from "./TodosList";
 import { v4 as uuidv4 } from 'uuid';
 import Todo from "./Todo";
+import NewTodoInput from "./NewTodoInput";
 
 export default function Todos() {
     const [ todos, setTodos ] = useState([
@@ -16,26 +17,19 @@ export default function Todos() {
             status: false
         }
     ]);
-    const [ newTodo, setNewTodo ] = useState('');
 
-// add new todo
-    const changeHandler = (e) => {
-        setNewTodo(e.target.value);
+// add todo
+    const addTodo = (todoTitle) => {
+        setTodos([
+            ...todos,
+            {
+                id: uuidv4(),
+                title: todoTitle,
+                status: false
+            }
+        ]);
     }
-    const pressEnterHandler = (e) => {
-        if (e.key == 'Enter' && newTodo != "") {
-            setTodos([
-                ...todos,
-                {
-                    id: uuidv4(),
-                    title: newTodo,
-                    status: false
-                }
-            ]);
 
-            setNewTodo('');
-        }
-    }
 
 // delete todo
     const deleteTodoHandler = (id) => {
@@ -76,11 +70,9 @@ export default function Todos() {
                         <h1 className="mr-6 text-4xl font-bold text-purple-600"> TO DO APP</h1>
                     </div>
                     <div className="relative">
-                        <input type="text" placeholder="What needs to be done today?"
-                            onChange={changeHandler}
-                            onKeyUp={pressEnterHandler}
-                            value={newTodo}
-                        className="w-full px-2 py-3 border rounded outline-none border-grey-600" />
+                        <NewTodoInput
+                            addTodo={addTodo}
+                        />
                     </div>
                     <TodosList>
                         {
