@@ -14,6 +14,7 @@ export default function NewTodoInput({ addTodo }) {
             setNewTodo('');
         }
     }
+
     return (
         <>
             <input
