@@ -28,10 +28,10 @@ export default function Todos() {
             .then(async res => {
                 if (res.ok) {
                     const data = await res.json();
-                    data.then(todo => setTodos([...todos, todo] ?? []))
+                    setTodos([...todos, data]);
                 }
 
-                toast('Todo Added :)')
+                // toast('Todo Added :)')
             })
         } catch (e) {
             toast('something went wrong :(')
@@ -40,8 +40,23 @@ export default function Todos() {
     }
 
 // delete todo
-    const deleteTodoHandler = (id) => {
-        setTodos(todos.filter(todo => todo.id != id));
+    const deleteTodoHandler = async (id) => {
+        try {
+            const res = await fetch( `${URL}/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                const deletedTodo = await res.json();
+
+                setTodos(todos.filter(todo => todo.id != deletedTodo.id));
+            }
+
+            // toast('todo deleted :)')
+        } catch (e) {
+            toast('sth wrong :(')
+            console.log(e)
+        }
     }
 
 // check uncheck
@@ -83,7 +98,7 @@ export default function Todos() {
                     data.then(todo => setTodos(todo ?? []))
                 }
 
-                toast('Todos Fetched :)')
+                // toast('Todos Fetched :)')
             })
         } catch (e) {
             toast('something went wrong :(')
