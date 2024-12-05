@@ -1,6 +1,3 @@
-/* eslint-disable react/prop-types */
-// import Todo from "./Todo";
-
 import { useContext } from "react"
 import { TodoContext } from "../context/todoContext"
 import Todo from "./Todo";

@@ -1,10 +1,4 @@
-/* eslint-disable react/jsx-key */
-/* eslint-disable no-case-declarations */
-/* eslint-disable no-unsafe-optional-chaining */
-/* eslint-disable no-unreachable */
-/* eslint-disable no-constant-binary-expression */
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useReducer } from "react";
+ import { useEffect, useReducer } from "react";
 import TodosList from "./TodosList";
 import { v4 as uuidv4 } from 'uuid';
 import NewTodoInput from "./NewTodoInput";
