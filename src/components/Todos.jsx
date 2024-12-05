@@ -31,7 +31,7 @@ export default function Todos() {
                     setTodos([...todos, data]);
                 }
 
-                // toast('Todo Added :)')
+                toast('Todo Added :)')
             })
         } catch (e) {
             toast('something went wrong :(')
@@ -52,7 +52,7 @@ export default function Todos() {
                 setTodos(todos.filter(todo => todo.id != deletedTodo.id));
             }
 
-            // toast('todo deleted :)')
+            toast('todo deleted :)')
         } catch (e) {
             toast('sth wrong :(')
             console.log(e)
@@ -98,16 +98,37 @@ export default function Todos() {
     }
 
 // edit todo
-    const pressEnterToEditHandler = (todo, editedTodo) => {
-        let newTodo = todos.map(item => {
-            if (todo.id == item.id) {
-                item.title = editedTodo;
+    const pressEnterToEditHandler = async (todo, editedTodoTitle) => {
+        try {
+            const res = await fetch( `${URL}/${todo.id}`, {
+                method: 'PUT',
+                headers: { 'content-type' : 'application/json' },
+                body: JSON.stringify(
+                    {
+                        title: editedTodoTitle
+                    }
+                )
+            });
+
+            if (res.ok) {
+                const newEditedTodo = await res.json();
+
+                let newTodos = todos.map(todo => {
+                    if (todo.id == newEditedTodo.id) {
+                        todo.title = newEditedTodo.title
+                    }
+
+                    return todo;
+                });
+
+                setTodos(newTodos);
+
+                toast('todo edited!')
             }
-
-            return item;
-        });
-
-        setTodos(newTodo);
+        } catch (e) {
+            toast('sth wrong :(')
+            console.log(e)
+        }
     }
 
 // fetch from api
