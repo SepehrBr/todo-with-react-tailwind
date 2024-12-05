@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 /* eslint-disable no-case-declarations */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable no-unreachable */
@@ -6,10 +7,10 @@
 import { useEffect, useReducer } from "react";
 import TodosList from "./TodosList";
 import { v4 as uuidv4 } from 'uuid';
-import Todo from "./Todo";
 import NewTodoInput from "./NewTodoInput";
 import { toast } from "react-toastify";
 import todoReducer from "../reducers/todoReducer";
+import { TodoContext } from "../context/todoContext";
 
 export default function Todos() {
     const [ todos, todosDispatcher ] = useReducer( todoReducer, []);
@@ -41,98 +42,12 @@ export default function Todos() {
                 );
             }
 
-            toast('Todo Added :)')
+            toast.success('Todo Added :)')
         } catch (e) {
             toast('something went wrong :(')
             console.log(e)
         }
     }
-
-// delete todo
-    const deleteTodoHandler = async (id) => {
-        try {
-            const res = await fetch( `${URL}/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (res.ok) {
-                const deletedTodo = await res.json();
-                todosDispatcher(
-                    {
-                        type: 'delete',
-                        todo: deletedTodo
-                    }
-                );
-            }
-
-            toast('todo deleted :)')
-        } catch (e) {
-            toast('sth wrong :(')
-            console.log(e)
-        }
-    }
-
-// check uncheck
-    const changeStatusHandler = async (toggledTodo) => {
-        try {
-            const res = await fetch( `${URL}/${toggledTodo.id}`, {
-                method: 'PUT',
-                headers: { 'content-type' : 'application/json' },
-                body: JSON.stringify(
-                    {
-                        status: ! toggledTodo.status
-                    }
-                )
-            });
-
-            if (res.ok) {
-                const newToggledTodo = await res.json();
-
-                todosDispatcher(
-                    {
-                        type: 'toggle',
-                        todo: newToggledTodo
-                    }
-                );
-
-                toast(`status ${newToggledTodo.status ? 'done' : 'undone'}!`);
-            }
-        } catch (e) {
-            toast('sth wrong :(')
-            console.log(e)
-        }
-    }
-
-// edit todo
-    const pressEnterToEditHandler = async (todo, editedTodoTitle) => {
-        try {
-            const res = await fetch( `${URL}/${todo.id}`, {
-                method: 'PUT',
-                headers: { 'content-type' : 'application/json' },
-                body: JSON.stringify(
-                    {
-                        title: editedTodoTitle
-                    }
-                )
-            });
-
-            if (res.ok) {
-                const newEditedTodo = await res.json();
-                todosDispatcher(
-                    {
-                        type: 'edit',
-                        todo: newEditedTodo
-                    }
-                )
-            }
-
-            toast('todo edited!');
-        } catch (e) {
-            toast('sth wrong :(')
-            console.log(e)
-        }
-    }
-
 
 // fetch from api
     const fetchAllTodos = async () => {
@@ -176,18 +91,14 @@ export default function Todos() {
                         addTodo={addTodo}
                     />
                 </div>
-                <TodosList>
+                <TodoContext.Provider value={
                     {
-                        todos.map((item) =>
-                            <Todo
-                                key={item.id}
-                                todo={item}
-                                deleteTodoHandler={deleteTodoHandler}
-                                changeStatus={changeStatusHandler}
-                                pressEnterToEditHandler={pressEnterToEditHandler}
-                            />)
+                        todos,
+                        todosDispatcher
                     }
-                </TodosList>
+                } >
+                    <TodosList />
+                </TodoContext.Provider>
             </div>
         </div>
     )
