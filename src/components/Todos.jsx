@@ -1,6 +1,9 @@
+/* eslint-disable no-case-declarations */
+/* eslint-disable no-unsafe-optional-chaining */
+/* eslint-disable no-unreachable */
 /* eslint-disable no-constant-binary-expression */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import TodosList from "./TodosList";
 import { v4 as uuidv4 } from 'uuid';
 import Todo from "./Todo";
@@ -8,13 +11,67 @@ import NewTodoInput from "./NewTodoInput";
 import { toast } from "react-toastify";
 
 export default function Todos() {
-    const [ todos, setTodos ] = useState([]);
+    const [ todos, todosDispatcher ] = useReducer((todos, action) => {
+        switch (action?.type) {
+            case 'fetch_all':
+                return [
+                    ...todos,
+                    ...action?.todos
+                ]
+
+            case 'add':
+                return [
+                    ...todos,
+                    {
+                        id: action?.id,
+                        title: action?.title,
+                        status: false
+                    }
+                ]
+
+            case 'delete':
+                let fliteredTodos = todos.filter(todo => todo.id != action?.todo.id);
+
+                return [
+                    ...fliteredTodos,
+                ]
+
+            case 'toggle':
+                let toggledTodos = todos.map(todo => {
+                        if (todo.id == action?.todo.id) {
+                            todo.status = action?.todo.status
+                        }
+
+                        return todo;
+                    });
+                return [
+                    ...toggledTodos,
+                ]
+
+            case 'edit':
+                let editedTodos = todos.map(todo => {
+                        if (todo.id == action?.todo.id) {
+                            todo.title = action?.todo.title
+                        }
+
+                        return todo
+                    });
+
+                return [
+                    ...editedTodos
+                ];
+
+
+            default:
+                return todos;
+        }
+    }, []);
     const URL = 'https://6750711369dc1669ec1b2e99.mockapi.io/todos'
 
 // add todo
     const addTodo = async (todoTitle) => {
         try {
-            await fetch( URL, {
+            const res = await fetch( URL, {
                 method: 'POST',
                 headers: { 'content-type' : 'application/json' },
                 body: JSON.stringify(
@@ -24,15 +81,20 @@ export default function Todos() {
                         status: false
                     }
                 )
-            })
-            .then(async res => {
-                if (res.ok) {
-                    const data = await res.json();
-                    setTodos([...todos, data]);
-                }
+            });
 
-                toast('Todo Added :)')
-            })
+            if (res.ok) {
+                const data = await res.json();
+                todosDispatcher(
+                    {
+                        type: 'add',
+                        id: data.id,
+                        title: data.title,
+                    }
+                );
+            }
+
+            toast('Todo Added :)')
         } catch (e) {
             toast('something went wrong :(')
             console.log(e)
@@ -48,8 +110,12 @@ export default function Todos() {
 
             if (res.ok) {
                 const deletedTodo = await res.json();
-
-                setTodos(todos.filter(todo => todo.id != deletedTodo.id));
+                todosDispatcher(
+                    {
+                        type: 'delete',
+                        todo: deletedTodo
+                    }
+                );
             }
 
             toast('todo deleted :)')
@@ -75,21 +141,14 @@ export default function Todos() {
             if (res.ok) {
                 const newToggledTodo = await res.json();
 
-                let newTodos = todos.map(todo => {
-                    if (todo.id == newToggledTodo.id) {
-                        todo.status = newToggledTodo.status
+                todosDispatcher(
+                    {
+                        type: 'toggle',
+                        todo: newToggledTodo
                     }
-
-                    return todo;
-                });
-
-                setTodos(newTodos);
-
-                newTodos.map( todo =>
-                    (todo.id == newToggledTodo.id)
-                    &&
-                    (toast(`status ${todo.status ? 'done' : 'undone'}!`))
                 );
+
+                toast(`status ${newToggledTodo.status ? 'done' : 'undone'}!`);
             }
         } catch (e) {
             toast('sth wrong :(')
@@ -112,44 +171,50 @@ export default function Todos() {
 
             if (res.ok) {
                 const newEditedTodo = await res.json();
-
-                let newTodos = todos.map(todo => {
-                    if (todo.id == newEditedTodo.id) {
-                        todo.title = newEditedTodo.title
+                todosDispatcher(
+                    {
+                        type: 'edit',
+                        todo: newEditedTodo
                     }
-
-                    return todo;
-                });
-
-                setTodos(newTodos);
-
-                toast('todo edited!')
+                )
             }
+
+            toast('todo edited!');
         } catch (e) {
             toast('sth wrong :(')
             console.log(e)
         }
     }
 
-// fetch from api
-    useEffect(() => {
-        try {
-            fetch( URL, {
-                method: 'GET',
-                headers: { 'content-type' : 'application/json' },
-            })
-            .then(async res => {
-                if (res.ok) {
-                    const data = res.json();
-                    data.then(todo => setTodos(todo ?? []))
-                }
 
-                // toast('Todos Fetched :)')
-            })
+// fetch from api
+    const fetchAllTodos = async () => {
+        try {
+            const res = await fetch( URL, {
+                    method: 'GET',
+                    headers: { 'content-type' : 'application/json' },
+                });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                todosDispatcher(
+                    {
+                        type: 'fetch_all',
+                        todos: data
+                    }
+                );
+            }
+
+            // toast('Todos Fetched :)')
         } catch (e) {
             toast('something went wrong :(')
             console.log(e)
         }
+    }
+
+    useEffect(() => {
+        fetchAllTodos();
     }, []);
 
 
