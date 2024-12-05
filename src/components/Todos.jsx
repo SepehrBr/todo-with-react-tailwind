@@ -1,25 +1,42 @@
+/* eslint-disable no-constant-binary-expression */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import TodosList from "./TodosList";
 import { v4 as uuidv4 } from 'uuid';
 import Todo from "./Todo";
 import NewTodoInput from "./NewTodoInput";
-
+import { toast } from "react-toastify";
 
 export default function Todos() {
     const [ todos, setTodos ] = useState([]);
+    const URL = 'https://6750711369dc1669ec1b2e99.mockapi.io/todos'
 
 // add todo
-    const addTodo = (todoTitle) => {
-        let newTodos = [
-            ...todos,
-            {
-                id: uuidv4(),
-                title: todoTitle,
-                status: false
-            }
-        ];
-        setTodos(newTodos);
+    const addTodo = async (todoTitle) => {
+        try {
+            await fetch( URL, {
+                method: 'POST',
+                headers: { 'content-type' : 'application/json' },
+                body: JSON.stringify(
+                    {
+                        id: uuidv4(),
+                        title: todoTitle,
+                        status: false
+                    }
+                )
+            })
+            .then(async res => {
+                if (res.ok) {
+                    const data = await res.json();
+                    data.then(todo => setTodos([...todos, todo] ?? []))
+                }
+
+                toast('Todo Added :)')
+            })
+        } catch (e) {
+            toast('something went wrong :(')
+            console.log(e)
+        }
     }
 
 // delete todo
@@ -53,14 +70,26 @@ export default function Todos() {
         setTodos(newTodo);
     }
 
-// localstorage
+// fetch from api
     useEffect(() => {
-        setTodos( JSON.parse(localStorage.getItem('todosList')) ?? []);
-    }, []);
+        try {
+            fetch( URL, {
+                method: 'GET',
+                headers: { 'content-type' : 'application/json' },
+            })
+            .then(async res => {
+                if (res.ok) {
+                    const data = res.json();
+                    data.then(todo => setTodos(todo ?? []))
+                }
 
-    useEffect(() => {
-        localStorage.setItem('todosList', JSON.stringify(todos));
-    }, [ todos ]);
+                toast('Todos Fetched :)')
+            })
+        } catch (e) {
+            toast('something went wrong :(')
+            console.log(e)
+        }
+    }, []);
 
 
     return (
