@@ -27,7 +27,7 @@ export default function Todo({ todo, deleteTodoHandler, changeStatus, pressEnter
                 :
                     <>
                         <div>
-                            <input type="checkbox" className="" onChange={() => changeStatus(todo.id)} checked={ todo.status ? 'checked' : '' } />
+                            <input type="checkbox" className="" onChange={() => changeStatus(todo)} checked={ todo.status ? 'checked' : '' } />
                             <p  className={`inline-block mt-1 ml-2 text-gray-600 ${todo.status && 'line-through'}`}>{todo?.title}</p>
                         </div>
                         <button type="button" className="absolute right-0 flex items-center space-x-1">

@@ -60,16 +60,41 @@ export default function Todos() {
     }
 
 // check uncheck
-    const changeStatusHandler = (id) => {
-        let toggleStatus = todos.map(todo => {
-            if (todo.id == id) {
-                todo.status = !todo.status;
+    const changeStatusHandler = async (toggledTodo) => {
+        try {
+            const res = await fetch( `${URL}/${toggledTodo.id}`, {
+                method: 'PUT',
+                headers: { 'content-type' : 'application/json' },
+                body: JSON.stringify(
+                    {
+                        status: ! toggledTodo.status
+                    }
+                )
+            });
+
+            if (res.ok) {
+                const newToggledTodo = await res.json();
+
+                let newTodos = todos.map(todo => {
+                    if (todo.id == newToggledTodo.id) {
+                        todo.status = newToggledTodo.status
+                    }
+
+                    return todo;
+                });
+
+                setTodos(newTodos);
+
+                newTodos.map( todo =>
+                    (todo.id == newToggledTodo.id)
+                    &&
+                    (toast(`status ${todo.status ? 'done' : 'undone'}!`))
+                );
             }
-
-            return todo;
-        });
-
-        setTodos(toggleStatus);
+        } catch (e) {
+            toast('sth wrong :(')
+            console.log(e)
+        }
     }
 
 // edit todo
